@@ -2,7 +2,10 @@ package org.sid.bankbackend;
 
 import org.sid.bankbackend.Exeption.BankNotFoundException;
 import org.sid.bankbackend.Exeption.CustomerNotFoundException;
+import org.sid.bankbackend.dtos.BankAccountDTO;
+import org.sid.bankbackend.dtos.CurrentBankAccountDTO;
 import org.sid.bankbackend.dtos.CustomerDTO;
+import org.sid.bankbackend.dtos.SavingBankAccountDTO;
 import org.sid.bankbackend.entities.*;
 import org.sid.bankbackend.enums.AccountStatus;
 import org.sid.bankbackend.enums.OperationType;
@@ -55,32 +58,43 @@ public class BankBackendApplication {
                  try {
                      bankAccountService.saveCurrentAccount(Math.random()*120000,9000,customer.getId());
                      bankAccountService.saveSavingAccount(Math.random()*120000,5.5,customer.getId());
-                     List<BankAccount> bankAccountList = bankAccountService.bankAccountList();
 
-                     for (BankAccount bankAccount : bankAccountList) {
-                         for (int i = 0; i < 10; i++) {
-                             double creditAmount = 10000 + Math.random() * 120000;
-                             bankAccountService.credit(bankAccount.getId(), creditAmount, "CREDIT");
-
-                             double debitAmount = 10000 + Math.random() * 120000;
-
-                             // Vérifie le solde avant débit
-                             if (bankAccount.getBalance() >= debitAmount) {
-                                 bankAccountService.debit(bankAccount.getId(), debitAmount, "DEBIT");
-                             } else {
-                                 System.out.println("Solde insuffisant pour le débit de " + debitAmount + " sur le compte " + bankAccount.getId());
-                             }
-                         }
-                     }
 
 
                  } catch (CustomerNotFoundException e) {
                      e.printStackTrace();
-                 }catch (BankNotFoundException e) {
-                     e.printStackTrace();
-                 }
+                 } //catch (BankNotFoundException e) {
+                    // e.printStackTrace();
+                // }
 
              });
+            List<BankAccountDTO> bankAccountList = bankAccountService.bankAccountList();
+
+            for (BankAccountDTO bankAccount : bankAccountList) {
+                for (int i = 0; i < 10; i++) {
+                    String accountId ;
+                    double balance;
+                    if(bankAccount instanceof SavingBankAccountDTO){
+                        accountId = ((SavingBankAccountDTO) bankAccount).getId();
+                        balance = ((SavingBankAccountDTO) bankAccount).getBalance();
+                    }
+                    else {
+                        accountId = ((CurrentBankAccountDTO) bankAccount).getId();
+                        balance = ((CurrentBankAccountDTO) bankAccount).getBalance();
+                    }
+                    double creditAmount = 10000 + Math.random() * 120000;
+                    bankAccountService.credit(accountId, creditAmount, "CREDIT");
+
+                    double debitAmount = 10000 + Math.random() * 120000;
+
+                    // Vérifie le solde avant débit
+                    if (balance >= debitAmount) {
+                        bankAccountService.debit(accountId, debitAmount, "DEBIT");
+                    } else {
+                        System.out.println("Solde insuffisant pour le débit de " + debitAmount + " sur le compte " + accountId);
+                    }
+                }
+            }
         };
 
 

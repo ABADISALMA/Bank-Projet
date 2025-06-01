@@ -45,5 +45,7 @@ public class CustomerRestController {
     public void deleteCustomer(@PathVariable Long customerId) throws CustomerNotFoundException {
         bankAccountService.deleteCustomer(customerId);
     }
+
+
 }
 
